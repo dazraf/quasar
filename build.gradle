@@ -23,8 +23,8 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'com.jfrog.artifactory'
 
-    sourceCompatibility = '1.7'
-    targetCompatibility = '1.7'
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
@@ -383,28 +383,28 @@ project (':quasar-core') {
         main {
             java {
                 srcDir 'src/main/java'
-                srcDir 'src/jdk7/java'
+                //srcDir 'src/jdk7/java'
             }
         }
 
-        jdk7 {
-            java {
-                srcDir 'src/main/java'
-                srcDir 'src/jdk7/java'
-            }
-
-            compileClasspath += main.compileClasspath // += main.uoutput
-            runtimeClasspath += main.runtimeClasspath // += main.uoutput
-        }
-
-        jdk7test {
-            java {
-                srcDir 'src/test/java'
-            }
-
-            compileClasspath += jdk7.output + test.compileClasspath
-            runtimeClasspath += compileClasspath  + test.runtimeClasspath
-        }
+//        jdk7 {
+//            java {
+//                srcDir 'src/main/java'
+//                srcDir 'src/jdk7/java'
+//            }
+//
+//            compileClasspath += main.compileClasspath // += main.uoutput
+//            runtimeClasspath += main.runtimeClasspath // += main.uoutput
+//        }
+//
+//        jdk7test {
+//            java {
+//                srcDir 'src/test/java'
+//            }
+//
+//            compileClasspath += jdk7.output + test.compileClasspath
+//            runtimeClasspath += compileClasspath  + test.runtimeClasspath
+//        }
 
         jdk8 {
             java {
@@ -440,18 +440,18 @@ project (':quasar-core') {
                 srcDir 'src/classloadertest/java'
             }
 
-            compileClasspath += jdk7.output + test.compileClasspath
+            //compileClasspath += jdk7.output + test.compileClasspath
             runtimeClasspath += compileClasspath + test.runtimeClasspath
         }
     }
 
     configurations {
-        jdk7Archives.extendsFrom runtime
+        //jdk7Archives.extendsFrom runtime
         jdk8Archives.extendsFrom runtime
     }
 
     dependencies {
-        jdk7Compile ":jsr166e"
+        //jdk7Compile ":jsr166e"
         compile ":high-scale-lib"
         compile "org.hdrhistogram:HdrHistogram:2.1.9"
         compile("org.latencyutils:LatencyUtils:2.0.3") {
@@ -473,10 +473,8 @@ project (':quasar-core') {
         provided 'junit:junit:4.12'
     }
 
-    def ssets = [sourceSets.jdk7]
-    if(ext.java8) {
-        ssets += sourceSets.jdk8
-    }
+    //def ssets = [sourceSets.jdk7]
+    def ssets = sourceSets.jdk8
 
     ssets.each { set ->
         configure(project.tasks["compile${capitalize(set.name)}Java"]) {
@@ -532,25 +530,25 @@ project (':quasar-core') {
         check.dependsOn testTask
     }
 
-    compileJdk7Java {
-        sourceCompatibility = '1.7'
-        targetCompatibility = '1.7'
-    }
+//    compileJdk7Java {
+//        sourceCompatibility = '1.7'
+//        targetCompatibility = '1.7'
+//    }
 
     //    jdk7Jar {
     //        from zipTree("${baselib}/jsr166e.jar")  // include non-Maven jars
     //    }
 
-    jdk7ShadowJar {
-        dependencies {
-            include(dependency(':jsr166e'))
-        }
-    }
+//    jdk7ShadowJar {
+//        dependencies {
+//            include(dependency(':jsr166e'))
+//        }
+//    }
 
-    artifacts {
-        jdk7Archives jdk7ShadowJar
-    }
-
+//    artifacts {
+//        jdk7Archives jdk7ShadowJar
+//    }
+//
     if (ext.java8) {
         compileJdk8Java {
             sourceCompatibility = '1.8'
