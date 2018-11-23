@@ -600,7 +600,7 @@ project (':quasar-core') {
     assemble.dependsOn shadowJar
     build.dependsOn shadowJar
     install.dependsOn shadowJar
-//    signArchives.dependsOn shadowJar
+    signArchives.dependsOn shadowJar
 //    uploadArchives.dependsOn shadowJar
 
     def installer = install.repositories.mavenInstaller
