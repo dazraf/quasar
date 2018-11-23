@@ -4,7 +4,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
         classpath 'net.saliman:gradle-cobertura-plugin:2.3.1'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.7.3"
@@ -378,11 +378,6 @@ project (':quasar-core') {
         }
     }
 
-    ext {
-        mavenArtifacts = {
-            project.shadow.component(it)
-        }
-    }
 
 
     [compileJava, compileTestJava, classes, jar]*.enabled = false
@@ -610,7 +605,6 @@ project (':quasar-core') {
     install.dependsOn shadowJar
     signArchives.dependsOn shadowJar
     artifactoryPublish.dependsOn shadowJar
-    publish.dependsOn shadowJar
 //    uploadArchives.dependsOn shadowJar
 
     def installer = install.repositories.mavenInstaller
@@ -630,6 +624,30 @@ project (':quasar-core') {
             archives javadocJar
         }
     }
+    ext {
+        mavenArtifacts = {
+            it.artifact jdk7ShadowJar
+            it.artifact jdk8ShadowJar
+
+            it.pom{ pom->
+                pom.withXml{ xml ->
+                    def dependenciesNode = xml.asNode().appendNode('dependencies')
+                    project.configurations.jdk8Archives.allDependencies.each {
+                        if (! (it instanceof SelfResolvingDependency)) {
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', it.group)
+                            dependencyNode.appendNode('artifactId', it.name)
+                            dependencyNode.appendNode('version', it.version)
+                            dependencyNode.appendNode('scope', 'runtime')
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
+
 }
 
 project (':quasar-actors') {
@@ -817,6 +835,9 @@ configure(publishedProjects) { subproject ->
     publishing {
         publications {
             create(subproject.name, MavenPublication) {
+
+//                if (subproject.name == "quasar-core"){
+//                    subproject.shadow.component(it)
                 if (subproject.hasProperty("mavenArtifacts")) {
                     subproject.mavenArtifacts.call(it)
                 } else {
