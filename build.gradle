@@ -31,7 +31,7 @@ subprojects {
     }
 
     group               = "co.paralleluniverse"
-    version             = "0.7.11-3"
+    version             = "0.7.11_r3"
     status              = "integration"
     description         = "Fibers, Channels and Actors for the JVM"
     ext.url             = "http://puniverse.github.com/quasar"
@@ -56,7 +56,8 @@ subprojects {
         ext.mainClass = ''
     }
 
-    repositories {
+
+        repositories {
         flatDir {
             dirs baselib
         }
@@ -377,6 +378,13 @@ project (':quasar-core') {
         }
     }
 
+    ext {
+        mavenArtifacts = {
+            project.shadow.component(it)
+        }
+    }
+
+
     [compileJava, compileTestJava, classes, jar]*.enabled = false
 
     sourceSets {
@@ -601,6 +609,8 @@ project (':quasar-core') {
     build.dependsOn shadowJar
     install.dependsOn shadowJar
     signArchives.dependsOn shadowJar
+    artifactoryPublish.dependsOn shadowJar
+    publish.dependsOn shadowJar
 //    uploadArchives.dependsOn shadowJar
 
     def installer = install.repositories.mavenInstaller
@@ -807,12 +817,17 @@ configure(publishedProjects) { subproject ->
     publishing {
         publications {
             create(subproject.name, MavenPublication) {
-                from components.java
+                if (subproject.hasProperty("mavenArtifacts")) {
+                    subproject.mavenArtifacts.call(it)
+                } else {
+                    from components.java
+                }
 
                 groupId subproject.group
                 artifactId subproject.name
                 artifact tasks.sourceJar
                 artifact tasks.javadocJar
+
 
                 pom {
                     name = subproject.name
@@ -842,6 +857,16 @@ configure(publishedProjects) { subproject ->
                             id = 'pron'
                             name = 'Ron Pressler'
                         }
+                    }
+                }
+                pom.withXml {
+                    Node pomNode = asNode()
+                    pomNode.dependencies.'*'.findAll() {
+                        it.artifactId.text().startsWith('jsr166e') ||
+                                it.artifactId.text().startsWith('high-scale-lib') ||
+                                it.artifactId.text().startsWith('org.ow2.asm')
+                    }.each() {
+                        it.parent().remove(it)
                     }
                 }
             }
