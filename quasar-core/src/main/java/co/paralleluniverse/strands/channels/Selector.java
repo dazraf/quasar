@@ -15,12 +15,14 @@ package co.paralleluniverse.strands.channels;
 
 import co.paralleluniverse.common.monitoring.FlightRecorder;
 import co.paralleluniverse.common.monitoring.FlightRecorderMessage;
+import co.paralleluniverse.common.reflection.GetDeclaredField;
 import co.paralleluniverse.common.util.Debug;
 import co.paralleluniverse.common.util.UtilUnsafe;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.Strand;
 import co.paralleluniverse.strands.Synchronization;
 import co.paralleluniverse.strands.Timeout;
+import java.security.PrivilegedActionException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,7 +32,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import sun.misc.Unsafe;
 
-/**
+import static java.security.AccessController.doPrivileged;
+
+ /**
  * Attempts to perform at most one channel operation (send or receive) of a given set.
  *
  * @author pron
@@ -520,7 +524,9 @@ public class Selector<Message> implements Synchronization {
 
     static {
         try {
-            winnerOffset = UNSAFE.objectFieldOffset(Selector.class.getDeclaredField("winner"));
+            winnerOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(Selector.class, "winner")));
+        } catch (PrivilegedActionException ex) {
+            throw new Error(ex.getCause());
         } catch (Exception ex) {
             throw new Error(ex);
         }

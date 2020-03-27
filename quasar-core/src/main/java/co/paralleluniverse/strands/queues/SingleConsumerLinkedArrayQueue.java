@@ -13,12 +13,16 @@
  */
 package co.paralleluniverse.strands.queues;
 
+import co.paralleluniverse.common.reflection.GetDeclaredField;
 import co.paralleluniverse.common.util.UtilUnsafe;
 import com.google.common.collect.Lists;
+import java.security.PrivilegedActionException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import sun.misc.Unsafe;
+
+import static java.security.AccessController.doPrivileged;
 
 /**
  *
@@ -313,10 +317,12 @@ abstract class SingleConsumerLinkedArrayQueue<E> extends SingleConsumerQueue<E> 
 
     static {
         try {
-            headOffset = UNSAFE.objectFieldOffset(SingleConsumerLinkedArrayQueue.class.getDeclaredField("head"));
-            tailOffset = UNSAFE.objectFieldOffset(SingleConsumerLinkedArrayQueue.class.getDeclaredField("tail"));
-            nextOffset = UNSAFE.objectFieldOffset(Node.class.getDeclaredField("next"));
-            prevOffset = UNSAFE.objectFieldOffset(Node.class.getDeclaredField("prev"));
+            headOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(SingleConsumerLinkedArrayQueue.class, "head")));
+            tailOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(SingleConsumerLinkedArrayQueue.class, "tail")));
+            nextOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(Node.class, "next")));
+            prevOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(Node.class, "prev")));
+        } catch (PrivilegedActionException ex) {
+            throw new Error(ex.getCause());
         } catch (Exception ex) {
             throw new Error(ex);
         }

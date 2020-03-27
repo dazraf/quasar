@@ -21,14 +21,18 @@
  */
 package co.paralleluniverse.strands.channels;
 
+import co.paralleluniverse.common.reflection.GetDeclaredField;
 import co.paralleluniverse.common.util.DelegatingEquals;
 import co.paralleluniverse.common.util.UtilUnsafe;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.Strand;
 import co.paralleluniverse.strands.Synchronization;
 import co.paralleluniverse.strands.Timeout;
+import java.security.PrivilegedActionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+
+import static java.security.AccessController.doPrivileged;
 
 /**
  *
@@ -414,10 +418,12 @@ public class TransferChannel<Message> implements StandardChannel<Message>, Selec
             try {
                 UNSAFE = UtilUnsafe.getUnsafe();
                 Class k = Node.class;
-                itemOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("item"));
-                saOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("sa"));
-                nextOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("next"));
-                waiterOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("waiter"));
+                itemOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(k, "item")));
+                saOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(k, "sa")));
+                nextOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(k, "next")));
+                waiterOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(k, "waiter")));
+            } catch (PrivilegedActionException e) {
+                throw new Error(e.getCause());
             } catch (Exception e) {
                 throw new Error(e);
             }
@@ -906,9 +912,11 @@ public class TransferChannel<Message> implements StandardChannel<Message>, Selec
         try {
             UNSAFE = UtilUnsafe.getUnsafe();
             Class k = TransferChannel.class;
-            headOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("head"));
-            tailOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("tail"));
-            sweepVotesOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("sweepVotes"));
+            headOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(k, "head")));
+            tailOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(k, "tail")));
+            sweepVotesOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(k, "sweepVotes")));
+        } catch (PrivilegedActionException e) {
+            throw new Error(e.getCause());
         } catch (Exception e) {
             throw new Error(e);
         }

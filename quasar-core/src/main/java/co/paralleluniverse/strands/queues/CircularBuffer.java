@@ -13,8 +13,12 @@
  */
 package co.paralleluniverse.strands.queues;
 
+import co.paralleluniverse.common.reflection.GetDeclaredField;
 import co.paralleluniverse.common.util.UtilUnsafe;
 import sun.misc.Unsafe;
+import java.security.PrivilegedActionException;
+
+import static java.security.AccessController.doPrivileged;
 
 /**
  *
@@ -180,8 +184,10 @@ public abstract class CircularBuffer<E> implements BasicQueue<E> {
 
     static {
         try {
-            tailOffset = UNSAFE.objectFieldOffset(CircularBuffer.class.getDeclaredField("tail"));
-            lastWrittenOffset = UNSAFE.objectFieldOffset(CircularBuffer.class.getDeclaredField("lastWritten"));
+            tailOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(CircularBuffer.class, "tail")));
+            lastWrittenOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(CircularBuffer.class, "lastWritten")));
+        } catch (PrivilegedActionException ex) {
+            throw new Error(ex.getCause());
         } catch (Exception ex) {
             throw new Error(ex);
         }

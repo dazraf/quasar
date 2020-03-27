@@ -21,14 +21,18 @@
  */
 package co.paralleluniverse.strands.concurrent;
 
+import co.paralleluniverse.common.reflection.GetDeclaredField;
 import co.paralleluniverse.common.util.UtilUnsafe;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.strands.Strand;
+import java.security.PrivilegedActionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
+
+import static java.security.AccessController.doPrivileged;
 
 /**
  * A reusable synchronization barrier, similar in functionality to
@@ -1170,8 +1174,9 @@ public class Phaser {
     static {
         try {
             UNSAFE = UtilUnsafe.getUnsafe();
-            Class k = Phaser.class;
-            stateOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("state"));
+            stateOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(Phaser.class, "state")));
+        } catch (PrivilegedActionException e) {
+            throw new Error(e.getCause());
         } catch (Exception e) {
             throw new Error(e);
         }

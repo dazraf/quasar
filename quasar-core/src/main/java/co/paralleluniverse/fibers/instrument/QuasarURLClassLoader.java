@@ -13,6 +13,8 @@
  */
 package co.paralleluniverse.fibers.instrument;
 
+import co.paralleluniverse.common.reflection.GetAccessDeclaredField;
+import co.paralleluniverse.common.reflection.GetAccessDeclaredMethod;
 import com.google.common.io.ByteStreams;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,14 +27,16 @@ import java.net.URLClassLoader;
 import java.net.URLStreamHandlerFactory;
 import java.nio.ByteBuffer;
 import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.security.CodeSigner;
+import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.security.cert.Certificate;
 import java.util.Arrays;
 import java.util.jar.Manifest;
 import sun.misc.Resource;
 import sun.misc.URLClassPath;
+
+import static java.security.AccessController.doPrivileged;
 
 /**
  *
@@ -79,7 +83,7 @@ public class QuasarURLClassLoader extends URLClassLoader {
     protected Class<?> findClass(final String name)
             throws ClassNotFoundException {
         try {
-            return AccessController.doPrivileged(
+            return doPrivileged(
                     new PrivilegedExceptionAction<Class>() {
                         @Override
                         public Class run() throws ClassNotFoundException {
@@ -204,14 +208,11 @@ public class QuasarURLClassLoader extends URLClassLoader {
 
     static {
         try {
-            ucpField = URLClassLoader.class.getDeclaredField("ucp");
-            accField = URLClassLoader.class.getDeclaredField("acc");
-            defineClassMethod = URLClassLoader.class.getDeclaredMethod("defineClass", String.class, Resource.class);
-            ucpField.setAccessible(true);
-            accField.setAccessible(true);
-            defineClassMethod.setAccessible(true);
-        } catch (NoSuchFieldException | NoSuchMethodException | SecurityException e) {
-            throw new RuntimeException(e);
+            ucpField = doPrivileged(new GetAccessDeclaredField(URLClassLoader.class, "ucp"));
+            accField = doPrivileged(new GetAccessDeclaredField(URLClassLoader.class, "acc"));
+            defineClassMethod = doPrivileged(new GetAccessDeclaredMethod(URLClassLoader.class, "defineClass", String.class, Resource.class));
+        } catch (PrivilegedActionException e) {
+            throw new RuntimeException(e.getCause());
         }
     }
 

@@ -33,16 +33,20 @@
 
 package co.paralleluniverse.strands.concurrent;
 
+import co.paralleluniverse.common.reflection.GetDeclaredField;
 import co.paralleluniverse.common.util.UtilUnsafe;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.strands.Strand;
+import java.security.PrivilegedActionException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import sun.misc.Unsafe;
+
+import static java.security.AccessController.doPrivileged;
 
 /**
  * Provides a framework for implementing blocking locks and related
@@ -2327,16 +2331,17 @@ public abstract class AbstractQueuedSynchronizer
     static {
         try {
             stateOffset = unsafe.objectFieldOffset
-                (AbstractQueuedSynchronizer.class.getDeclaredField("state"));
+                (doPrivileged(new GetDeclaredField(AbstractQueuedSynchronizer.class, "state")));
             headOffset = unsafe.objectFieldOffset
-                (AbstractQueuedSynchronizer.class.getDeclaredField("head"));
+                (doPrivileged(new GetDeclaredField(AbstractQueuedSynchronizer.class, "head")));
             tailOffset = unsafe.objectFieldOffset
-                (AbstractQueuedSynchronizer.class.getDeclaredField("tail"));
+                (doPrivileged(new GetDeclaredField(AbstractQueuedSynchronizer.class, "tail")));
             waitStatusOffset = unsafe.objectFieldOffset
-                (Node.class.getDeclaredField("waitStatus"));
+                (doPrivileged(new GetDeclaredField(Node.class, "waitStatus")));
             nextOffset = unsafe.objectFieldOffset
-                (Node.class.getDeclaredField("next"));
-
+                (doPrivileged(new GetDeclaredField(Node.class, "next")));
+        } catch (PrivilegedActionException ex) {
+            throw new Error(ex.getCause());
         } catch (Exception ex) { throw new Error(ex); }
     }
 

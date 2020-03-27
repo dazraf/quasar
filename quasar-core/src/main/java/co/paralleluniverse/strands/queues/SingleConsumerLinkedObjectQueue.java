@@ -13,7 +13,11 @@
  */
 package co.paralleluniverse.strands.queues;
 
+import co.paralleluniverse.common.reflection.GetDeclaredField;
 import co.paralleluniverse.common.util.Objects;
+import java.security.PrivilegedActionException;
+
+import static java.security.AccessController.doPrivileged;
 
 /**
  *
@@ -51,7 +55,9 @@ public class SingleConsumerLinkedObjectQueue<E> extends SingleConsumerLinkedQueu
 
     static {
         try {
-            valueOffset = UNSAFE.objectFieldOffset(ObjectNode.class.getDeclaredField("value"));
+            valueOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(ObjectNode.class, "value")));
+        } catch (PrivilegedActionException ex) {
+            throw new Error(ex.getCause());
         } catch (Exception ex) {
             throw new Error(ex);
         }

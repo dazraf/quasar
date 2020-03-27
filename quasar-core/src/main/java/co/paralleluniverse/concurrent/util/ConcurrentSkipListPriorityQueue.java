@@ -21,8 +21,13 @@
  */
 package co.paralleluniverse.concurrent.util;
 
+import co.paralleluniverse.common.reflection.GetDeclaredField;
 import co.paralleluniverse.common.util.UtilUnsafe;
+
+import java.security.PrivilegedActionException;
 import java.util.*;
+
+import static java.security.AccessController.doPrivileged;
 
 public class ConcurrentSkipListPriorityQueue<E> extends AbstractQueue<E>
         implements Cloneable,
@@ -427,8 +432,10 @@ public class ConcurrentSkipListPriorityQueue<E> extends AbstractQueue<E>
             try {
                 UNSAFE = UtilUnsafe.getUnsafe();
                 Class k = Node.class;
-                valueOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("value"));
-                nextOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("next"));
+                valueOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(k, "value")));
+                nextOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(k, "next")));
+            } catch (PrivilegedActionException e) {
+                throw new Error(e.getCause());
             } catch (Exception e) {
                 throw new Error(e);
             }
@@ -507,7 +514,9 @@ public class ConcurrentSkipListPriorityQueue<E> extends AbstractQueue<E>
             try {
                 UNSAFE = UtilUnsafe.getUnsafe();
                 Class k = Index.class;
-                rightOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("right"));
+                rightOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(k, "right")));
+            } catch (PrivilegedActionException e) {
+                throw new Error(e.getCause());
             } catch (Exception e) {
                 throw new Error(e);
             }
@@ -1570,7 +1579,9 @@ public class ConcurrentSkipListPriorityQueue<E> extends AbstractQueue<E>
         try {
             UNSAFE = UtilUnsafe.getUnsafe();
             Class k = ConcurrentSkipListPriorityQueue.class;
-            headOffset = UNSAFE.objectFieldOffset(k.getDeclaredField("head"));
+            headOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(k, "head")));
+        } catch (PrivilegedActionException e) {
+            throw new Error(e.getCause());
         } catch (Exception e) {
             throw new Error(e);
         }

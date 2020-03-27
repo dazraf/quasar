@@ -31,16 +31,20 @@
 
 package co.paralleluniverse.strands.concurrent;
 
+import co.paralleluniverse.common.reflection.GetDeclaredField;
 import co.paralleluniverse.common.util.UtilUnsafe;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.strands.Strand;
+import java.security.PrivilegedActionException;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.locks.Condition;
 import sun.misc.Unsafe;
+
+import static java.security.AccessController.doPrivileged;
 
 /**
  * A version of {@link AbstractQueuedSynchronizer} in
@@ -2091,16 +2095,17 @@ public abstract class AbstractQueuedLongSynchronizer
     static {
         try {
             stateOffset = unsafe.objectFieldOffset
-                (AbstractQueuedLongSynchronizer.class.getDeclaredField("state"));
+                (doPrivileged(new GetDeclaredField(AbstractQueuedLongSynchronizer.class, "state")));
             headOffset = unsafe.objectFieldOffset
-                (AbstractQueuedLongSynchronizer.class.getDeclaredField("head"));
+                (doPrivileged(new GetDeclaredField(AbstractQueuedLongSynchronizer.class, "head")));
             tailOffset = unsafe.objectFieldOffset
-                (AbstractQueuedLongSynchronizer.class.getDeclaredField("tail"));
+                (doPrivileged(new GetDeclaredField(AbstractQueuedLongSynchronizer.class, "tail")));
             waitStatusOffset = unsafe.objectFieldOffset
-                (Node.class.getDeclaredField("waitStatus"));
+                (doPrivileged(new GetDeclaredField(Node.class, "waitStatus")));
             nextOffset = unsafe.objectFieldOffset
-                (Node.class.getDeclaredField("next"));
-
+                (doPrivileged(new GetDeclaredField(Node.class, "next")));
+        } catch (PrivilegedActionException ex) {
+            throw new Error(ex.getCause());
         } catch (Exception ex) { throw new Error(ex); }
     }
 

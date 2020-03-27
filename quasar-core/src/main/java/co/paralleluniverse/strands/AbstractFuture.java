@@ -13,15 +13,19 @@
  */
 package co.paralleluniverse.strands;
 
+import co.paralleluniverse.common.reflection.GetDeclaredField;
 import co.paralleluniverse.common.util.UtilUnsafe;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
+import java.security.PrivilegedActionException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import sun.misc.Unsafe;
+
+import static java.security.AccessController.doPrivileged;
 
 /**
  *
@@ -149,7 +153,9 @@ public class AbstractFuture<V> implements Future<V> {
 
     static {
         try {
-            settingOffset = UNSAFE.objectFieldOffset(AbstractFuture.class.getDeclaredField("setting"));
+            settingOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(AbstractFuture.class, "setting")));
+        } catch (PrivilegedActionException ex) {
+            throw new AssertionError(ex.getCause());
         } catch (Exception ex) {
             throw new AssertionError(ex);
         }
