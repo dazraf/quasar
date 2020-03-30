@@ -47,7 +47,7 @@ subprojects {
     ext.baselib         = "${rootProject.projectDir}/baselib"
     ext.java8 = rootProject.ext.java8
     ext.jdkVer = ext.java8 ? "8" : "7"
-    ext.quasarJar = "${rootProject.projectDir}/quasar-core/build/libs/quasar-core-${version}${ext.java8 ? "-jdk8" : ""}.jar" // project(':quasar-core').jar.archivePath
+    ext.quasarJar = "${rootProject.projectDir}/quasar-core/build/libs/quasar-core-${version}${ext.java8 ? "" : "-jdk7"}.jar" // project(':quasar-core').jar.archivePath
 
     ext.asmVer    = '5.2'
     ext.kotlinVer = '1.1.3-2'
@@ -548,6 +548,7 @@ project (':quasar-core') {
         dependencies {
             include(dependency(':jsr166e'))
         }
+        classifier = 'jdk7'
     }
 
     artifacts {
@@ -568,10 +569,6 @@ project (':quasar-core') {
         //        jdk8Jar {
         //            classifier = 'jdk8'
         //        }
-
-        jdk8ShadowJar {
-            classifier = 'jdk8'
-        }
 
         artifacts {
             jdk8Archives jdk8ShadowJar
