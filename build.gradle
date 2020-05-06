@@ -422,7 +422,7 @@ project (':quasar-core') {
         jdk8test {
             java {
                 srcDir 'src/test/java'
-                srcDir 'src/jdk8Test/java'
+                srcDir 'src/jdk8test/java'
             }
 
             compileClasspath += jdk8.output + test.compileClasspath
