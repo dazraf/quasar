@@ -32,7 +32,7 @@ subprojects {
     }
 
     group               = "co.paralleluniverse"
-    version             = "0.7.13_r3-SNAPSHOT"
+    version             = "0.7.13_r3"
     status              = "integration"
     description         = "Fibers, Channels and Actors for the JVM"
     ext.url             = "http://puniverse.github.com/quasar"
@@ -51,7 +51,7 @@ subprojects {
     ext.quasarJar = "${rootProject.projectDir}/quasar-core/build/libs/quasar-core-${version}${ext.java8 ? "" : "-jdk7"}.jar" // project(':quasar-core').jar.archivePath
 
     ext.asmVer    = '5.2'
-    ext.kotlinVer = '1.3.70'
+    ext.kotlinVer = '1.1.3-2'
 
     if (!project.hasProperty('mainClass')) { // must use project.hasProperty() rather than hasProperty in subprojects (gradle bug)
         ext.mainClass = ''

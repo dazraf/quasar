@@ -66,7 +66,7 @@ class Pong : Actor() {
                         println("Pong received 'finished', exiting")
                         return                      // Non-local return, exit actor
                     }
-                    is Companion.Timeout -> {
+                    is Timeout -> {
                         println("Pong timeout in 'receive', exiting")
                         return                      // Non-local return, exit actor
                     }
