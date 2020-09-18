@@ -13,11 +13,16 @@
  */
 package co.paralleluniverse.fibers.instrument;
 
-import co.paralleluniverse.common.reflection.ASMUtil;
+import co.paralleluniverse.asm.ASMUtil;
 import co.paralleluniverse.common.reflection.GetDeclaredMethod;
 import co.paralleluniverse.fibers.Suspendable;
-import static co.paralleluniverse.common.reflection.ASMUtil.*;
-import static java.security.AccessController.doPrivileged;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.DirectoryScanner;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.Task;
+import org.apache.tools.ant.types.FileSet;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,13 +41,9 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
-import org.apache.tools.ant.types.FileSet;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
+
+import static co.paralleluniverse.asm.ASMUtil.*;
+import static java.security.AccessController.doPrivileged;
 
 /**
  *
@@ -52,8 +53,8 @@ public class OldSuspendablesScanner extends Task {
     private static final boolean USE_REFLECTION = false;
     private static final String CLASSFILE_SUFFIX = ".class";
     private URLClassLoader cl;
-    private final ArrayList<FileSet> filesets = new ArrayList<FileSet>();
-    private final Set<String> results = new HashSet<String>();
+    private final ArrayList<FileSet> filesets = new ArrayList<>();
+    private final Set<String> results = new HashSet<>();
     private String supersFile;
     private boolean append;
     private SimpleSuspendableClassifier ssc;
@@ -230,7 +231,7 @@ public class OldSuspendablesScanner extends Task {
     }
 
     /////////// ASM
-    public void scanClass(ClassNode cls) throws Exception {
+    void scanClass(ClassNode cls) throws Exception {
         List<MethodNode> methods = cls.methods;
         for (MethodNode m : methods) {
             if (isSuspendable(cls, m)) {

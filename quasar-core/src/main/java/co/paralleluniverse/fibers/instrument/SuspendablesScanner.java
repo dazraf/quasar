@@ -13,9 +13,9 @@
  */
 package co.paralleluniverse.fibers.instrument;
 
-import co.paralleluniverse.common.reflection.ClassLoaderUtil;
-import static co.paralleluniverse.common.reflection.ClassLoaderUtil.isClassFile;
-import static co.paralleluniverse.common.reflection.ClassLoaderUtil.classToResource;
+import co.paralleluniverse.common.resource.ClassLoaderUtil;
+import static co.paralleluniverse.common.resource.ClassLoaderUtil.isClassFile;
+import static co.paralleluniverse.common.resource.ClassLoaderUtil.classToResource;
 import static co.paralleluniverse.fibers.instrument.Classes.SUSPENDABLE_DESC;
 import static co.paralleluniverse.fibers.instrument.Classes.DONT_INSTRUMENT_DESC;
 import static co.paralleluniverse.fibers.instrument.Classes.SUSPEND_EXECUTION_NAME;
@@ -238,7 +238,7 @@ public class SuspendablesScanner extends Task {
         });
     }
 
-    private void visitAntProject(Function<InputStream, Void> classFileVisitor) throws IOException {
+    private void visitAntProject(Function<InputStream, Void> classFileVisitor) {
         for (FileSet fs : filesets) {
             try {
                 final DirectoryScanner ds = fs.getDirectoryScanner(getProject());
@@ -265,7 +265,7 @@ public class SuspendablesScanner extends Task {
     private void visitProjectDir(final Function<InputStream, Void> classFileVisitor) throws IOException {
         Files.walkFileTree(projectDir, new SimpleFileVisitor<Path>() {
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
                 try {
                     if (isClassFile(file.getFileName().toString()))
                         classFileVisitor.apply(Files.newInputStream(file));
@@ -305,7 +305,7 @@ public class SuspendablesScanner extends Task {
         private String className;
         private boolean suspendableClass;
 
-        public SuspendableClassifier(boolean inProject, int api, ClassVisitor cv) {
+        SuspendableClassifier(boolean inProject, int api, ClassVisitor cv) {
             super(api, cv);
             this.inProject = inProject;
         }
@@ -404,7 +404,7 @@ public class SuspendablesScanner extends Task {
         private final List<String> methods = new ArrayList<>();
         private ClassNode cn;
 
-        public ClassNodeVisitor(boolean inProject, int api, ClassVisitor cv) {
+        ClassNodeVisitor(boolean inProject, int api, ClassVisitor cv) {
             super(api, cv);
             this.inProject = inProject;
         }
@@ -442,7 +442,7 @@ public class SuspendablesScanner extends Task {
         private final boolean inProject;
         private String className;
 
-        public CallGraphVisitor(boolean inProject, int api, ClassVisitor cv) {
+        CallGraphVisitor(boolean inProject, int api, ClassVisitor cv) {
             super(api, cv);
             this.inProject = inProject;
         }
@@ -691,7 +691,7 @@ public class SuspendablesScanner extends Task {
         private int numSubs;
         private String[] methods;
 
-        public ClassNode(String name) {
+        ClassNode(String name) {
             this.name = name;
         }
 
@@ -764,7 +764,7 @@ public class SuspendablesScanner extends Task {
         private MethodNode[] callers;
         private int numCallers;
 
-        public MethodNode(String owner, String nameAndDesc) {
+        MethodNode(String owner, String nameAndDesc) {
             this.owner = owner.intern();
             this.name = nameAndDesc.intern();
         }

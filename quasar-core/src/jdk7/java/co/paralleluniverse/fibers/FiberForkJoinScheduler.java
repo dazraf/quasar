@@ -64,7 +64,7 @@ public class FiberForkJoinScheduler extends FiberScheduler {
     /**
      * Creates a new fiber scheduler using a default {@link UncaughtExceptionHandler UncaughtExceptionHandler}.
      *
-     * @param name         the scheuler's name. This name is used in naming the scheduler's threads.
+     * @param name         the scheduler's name. This name is used in naming the scheduler's threads.
      * @param parallelism  the number of threads in the pool
      * @param monitorType  the {@link MonitorType} type to use for the {@code ForkJoinPool}.
      * @param detailedInfo whether detailed information about the fibers is collected by the fibers monitor.
@@ -154,8 +154,8 @@ public class FiberForkJoinScheduler extends FiberScheduler {
     }
 
     @Override
-    Map<Thread, Fiber> getRunningFibers() {
-        Map<Thread, Fiber> fibers = new HashMap<>(activeThreads.size() + 2);
+    Map<Thread, Fiber<?>> getRunningFibers() {
+        Map<Thread, Fiber<?>> fibers = new HashMap<>(activeThreads.size() + 2);
         for (FiberWorkerThread t : activeThreads)
             fibers.put(t, getTargetFiber(t));
         return fibers;
@@ -180,7 +180,7 @@ public class FiberForkJoinScheduler extends FiberScheduler {
         return t instanceof FiberWorkerThread;
     }
 
-    static Fiber getTargetFiber(Thread thread) {
+    static Fiber<?> getTargetFiber(Thread thread) {
         final Object target = ParkableForkJoinTask.getTarget(thread);
         if (target == null || !(target instanceof Fiber.DummyRunnable))
             return null;
@@ -188,7 +188,7 @@ public class FiberForkJoinScheduler extends FiberScheduler {
     }
 
     @Override
-    void setCurrentFiber(Fiber target, Thread currentThread) {
+    void setCurrentFiber(Fiber<?> target, Thread currentThread) {
         if (isFiberThread(currentThread))
             ParkableForkJoinTask.setTarget(currentThread, target.fiberRef);
         else
