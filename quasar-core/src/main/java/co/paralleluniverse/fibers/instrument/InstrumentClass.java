@@ -135,7 +135,7 @@ class InstrumentClass extends ClassVisitor {
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         if (desc.equals(INSTRUMENTED_DESC) || desc.equals(DONT_INSTRUMENT_DESC))
             this.alreadyInstrumented = true;
-        else if (isInterface && desc.equals(SUSPENDABLE_DESC))
+        else if (isInterface && (desc.equals(SUSPENDABLE_DESC) || desc.equals(CUSTOM_SUSPENDABLE_DESC)))
             this.suspendableInterface = true;
 
         return super.visitAnnotation(desc, visible);
@@ -165,7 +165,7 @@ class InstrumentClass extends ClassVisitor {
                 @Override
                 public AnnotationVisitor visitAnnotation(String adesc, boolean visible) {
                     // look for @Suspendable or @DontInstrument annotation
-                    if (adesc.equals(SUSPENDABLE_DESC))
+                    if (adesc.equals(SUSPENDABLE_DESC) || adesc.equals(CUSTOM_SUSPENDABLE_DESC))
                         susp = SuspendableType.SUSPENDABLE;
                     else if (adesc.equals(DONT_INSTRUMENT_DESC))
                         susp = SuspendableType.NON_SUSPENDABLE;
@@ -291,7 +291,7 @@ class InstrumentClass extends ClassVisitor {
         if (ans == null)
             return false;
         for (AnnotationNode an : ans) {
-            if (an.desc.equals(SUSPENDABLE_DESC))
+            if (an.desc.equals(SUSPENDABLE_DESC) || an.desc.equals(CUSTOM_SUSPENDABLE_DESC))
                 return true;
         }
         return false;

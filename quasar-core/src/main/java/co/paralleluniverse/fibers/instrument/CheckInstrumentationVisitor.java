@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static co.paralleluniverse.common.asm.ASMUtil.ASMAPI;
+import static co.paralleluniverse.fibers.instrument.Classes.CUSTOM_SUSPENDABLE_DESC;
 import static co.paralleluniverse.fibers.instrument.Classes.INSTRUMENTED_DESC;
 import static co.paralleluniverse.fibers.instrument.Classes.SUSPENDABLE_DESC;
 
@@ -121,7 +122,7 @@ class CheckInstrumentationVisitor extends ClassVisitor {
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         if (desc.equals(INSTRUMENTED_DESC))
             this.alreadyInstrumented = true;
-        else if (isInterface && desc.equals(SUSPENDABLE_DESC))
+        else if (isInterface && (desc.equals(SUSPENDABLE_DESC) && desc.equals(CUSTOM_SUSPENDABLE_DESC)))
             this.suspendableInterface = true;
         return null;
     }
@@ -152,7 +153,7 @@ class CheckInstrumentationVisitor extends ClassVisitor {
 
                 @Override
                 public AnnotationVisitor visitAnnotation(String adesc, boolean visible) {
-                    if (adesc.equals(SUSPENDABLE_DESC))
+                    if (adesc.equals(SUSPENDABLE_DESC) || adesc.equals(CUSTOM_SUSPENDABLE_DESC))
                         susp = true;
                     return null;
                 }

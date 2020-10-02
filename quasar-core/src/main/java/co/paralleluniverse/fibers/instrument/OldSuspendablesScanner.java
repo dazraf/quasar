@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -225,7 +226,7 @@ public class OldSuspendablesScanner extends Task {
     }
 
     boolean isSuspendable(ClassNode cls, MethodNode m) {
-        return hasAnnotation(Suspendable.class, m)
+        return ASMUtil.hasAnnotation(Suspendable.class, m) || ASMUtil.hasAnnotation(Classes.CUSTOM_SUSPENDABLE_DESC, m.visibleAnnotations)
                 || (ssc != null && ssc.isSuspendable(cls.name, m.name, m.desc));
     }
 
@@ -284,9 +285,18 @@ public class OldSuspendablesScanner extends Task {
     private void scanClass(Class<?> cls) {
         Method[] methods = cls.getDeclaredMethods();
         for (Method m : methods) {
-            if (m.isAnnotationPresent(Suspendable.class))
+            if (m.isAnnotationPresent(Suspendable.class) || hasAnnotation(Classes.CUSTOM_SUSPENDABLE_DESC, m))
                 findSuperDeclarations(cls, m);
         }
+    }
+
+    private boolean hasAnnotation(String desc, Method method) {
+        for (Annotation annotation : method.getAnnotations()) {
+            if (annotation.toString().equals(desc)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void findSuperDeclarations(Class<?> cls, Method method) {

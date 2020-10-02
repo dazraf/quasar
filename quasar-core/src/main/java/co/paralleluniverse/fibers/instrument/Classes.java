@@ -26,7 +26,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
  *
  * @author pron
  */
-final class Classes {
+public final class Classes {
     private static final BlockingMethod[] BLOCKING_METHODS = {
         new BlockingMethod("java/lang/Thread", "sleep", "(J)V", "(JI)V"),
         new BlockingMethod("java/lang/Thread", "join", "()V", "(J)V", "(JI)V"),
@@ -56,6 +56,14 @@ final class Classes {
     static final String DONT_INSTRUMENT_DESC = Type.getDescriptor(DontInstrument.class);
     static final String INSTRUMENTED_DESC = "Lco/paralleluniverse/fibers/Instrumented;";
     static final String LAMBDA_METHOD_PREFIX = "lambda$";
+
+    public static String CUSTOM_SUSPENDABLE_ANNOTATION = "";
+    public static String CUSTOM_SUSPENDABLE_DESC = "";
+
+    public static void setCustomAnnotation(String s) {
+        CUSTOM_SUSPENDABLE_ANNOTATION = s;
+        CUSTOM_SUSPENDABLE_DESC = "L" + s.replace('.', '/') + ";";
+    }
 
     static boolean isYieldMethod(String className, String methodName) {
         return FIBER_CLASS_NAME.equals(className) && yieldMethods.contains(methodName);

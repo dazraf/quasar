@@ -27,6 +27,7 @@ import co.paralleluniverse.common.util.VisibleForTesting;
 import co.paralleluniverse.concurrent.util.ThreadAccess;
 import co.paralleluniverse.concurrent.util.ThreadUtil;
 import co.paralleluniverse.fibers.FiberForkJoinScheduler.FiberForkJoinTask;
+import co.paralleluniverse.fibers.instrument.Classes;
 import co.paralleluniverse.io.serialization.ByteArraySerializer;
 import co.paralleluniverse.io.serialization.kryo.KryoSerializer;
 import co.paralleluniverse.strands.Strand;
@@ -47,6 +48,7 @@ import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.Member;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.security.AccessControlContext;
 import java.security.AccessController;
@@ -1847,7 +1849,7 @@ public class Fiber<V> extends Strand implements Joinable<V>, Serializable, Futur
                             if (et.equals(SuspendExecution.class))
                                 return false;
                         }
-                        if (m.isAnnotationPresent(Suspendable.class))
+                        if (m.isAnnotationPresent(Suspendable.class) || currentFiber().hasAnnotation(Classes.CUSTOM_SUSPENDABLE_DESC, m))
                             return false;
                     }
                     return true;
@@ -1856,6 +1858,15 @@ public class Fiber<V> extends Strand implements Joinable<V>, Serializable, Futur
             } else
                 return false;
         }
+    }
+
+    private boolean hasAnnotation(String desc, Method method) {
+        for (Annotation annotation : method.getAnnotations()) {
+            if (annotation.toString().equals(desc)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @VisibleForTesting

@@ -63,6 +63,7 @@ import java.util.function.Function;
 import static co.paralleluniverse.common.asm.ASMUtil.ASMAPI;
 import static co.paralleluniverse.common.resource.ClassLoaderUtil.classToResource;
 import static co.paralleluniverse.common.resource.ClassLoaderUtil.isClassFile;
+import static co.paralleluniverse.fibers.instrument.Classes.CUSTOM_SUSPENDABLE_DESC;
 import static co.paralleluniverse.fibers.instrument.Classes.DONT_INSTRUMENT_DESC;
 import static co.paralleluniverse.fibers.instrument.Classes.SUSPENDABLE_DESC;
 import static co.paralleluniverse.fibers.instrument.Classes.SUSPEND_EXECUTION_NAME;
@@ -324,7 +325,7 @@ public class SuspendablesScanner extends Task {
         @Override
         public AnnotationVisitor visitAnnotation(String adesc, boolean visible) {
             final AnnotationVisitor av = super.visitAnnotation(adesc, visible);
-            if (adesc.equals(SUSPENDABLE_DESC))
+            if (adesc.equals(SUSPENDABLE_DESC) || adesc.equals(CUSTOM_SUSPENDABLE_DESC))
                 suspendableClass = true;
             return av;
         }
@@ -352,7 +353,7 @@ public class SuspendablesScanner extends Task {
                 public AnnotationVisitor visitAnnotation(String adesc, boolean visible) {
                     final AnnotationVisitor av = super.visitAnnotation(desc, visible);
 
-                    if (SUSPENDABLE_DESC.equals(adesc))
+                    if (SUSPENDABLE_DESC.equals(adesc) || CUSTOM_SUSPENDABLE_DESC.equals(adesc))
                         susp = noImpl ? SuspendableType.SUSPENDABLE_SUPER : SuspendableType.SUSPENDABLE;
                     else if (DONT_INSTRUMENT_DESC.equals(adesc))
                         susp = SuspendableType.NON_SUSPENDABLE;
