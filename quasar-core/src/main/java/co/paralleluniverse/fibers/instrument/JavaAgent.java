@@ -144,8 +144,7 @@ public class JavaAgent {
                             sb.append(c);
                         }
                         String[] exclusions = sb.toString().split(";");
-                        for (String x : exclusions)
-                            instrumentor.addExcludedPackage(x);
+                        instrumentor.addExcludedPackages(exclusions);
                         break;
 
                     case 'l':
@@ -159,9 +158,7 @@ public class JavaAgent {
                             throw new IllegalStateException(USAGE);
                         }
                         String[] classLoaderExclusions = agentArguments.substring(i, j).split(";", 0);
-                        for (String x : classLoaderExclusions) {
-                            instrumentor.addExcludedClassLoader(x);
-                        }
+                        instrumentor.addExcludedClassLoaders(classLoaderExclusions);
                         i = j;
                         break;
                     default:

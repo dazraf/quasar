@@ -23,7 +23,7 @@ public class ClassLoaderExclusionTest {
 
     @Test
     public void testRejectingEverything() {
-        instrumentor.addExcludedClassLoader("**");
+        instrumentor.addExcludedClassLoaders(new String[] {"**"});
         assertTrue(instrumentor.isExcludedClassLoader("X"));
         assertTrue(instrumentor.isExcludedClassLoader("a.X"));
         assertTrue(instrumentor.isExcludedClassLoader("a.b.X"));
@@ -32,7 +32,7 @@ public class ClassLoaderExclusionTest {
 
     @Test
     public void testRejectingDefaultPackageOnly() {
-        instrumentor.addExcludedClassLoader("*");
+        instrumentor.addExcludedClassLoaders(new String[] {"*"});
         assertTrue(instrumentor.isExcludedClassLoader("X"));
         assertFalse(instrumentor.isExcludedClassLoader("a.X"));
         assertFalse(instrumentor.isExcludedClassLoader("a.b.X"));
@@ -41,7 +41,7 @@ public class ClassLoaderExclusionTest {
 
     @Test
     public void testRejectingFirstLevel() {
-        instrumentor.addExcludedClassLoader("*.*");
+        instrumentor.addExcludedClassLoaders(new String[] {"*.*"});
         assertFalse(instrumentor.isExcludedClassLoader("X"));
         assertTrue(instrumentor.isExcludedClassLoader("a.X"));
         assertFalse(instrumentor.isExcludedClassLoader("a.b.X"));
@@ -50,7 +50,7 @@ public class ClassLoaderExclusionTest {
 
     @Test
     public void testRejectingFirstLevelAndBelow() {
-        instrumentor.addExcludedClassLoader("*.**");
+        instrumentor.addExcludedClassLoaders(new String[] {"*.**"});
         assertFalse(instrumentor.isExcludedClassLoader("X"));
         assertTrue(instrumentor.isExcludedClassLoader("a.X"));
         assertTrue(instrumentor.isExcludedClassLoader("a.b.X"));
@@ -59,7 +59,7 @@ public class ClassLoaderExclusionTest {
 
     @Test
     public void testRejectingSecondLevel() {
-        instrumentor.addExcludedClassLoader("*.*.*");
+        instrumentor.addExcludedClassLoaders(new String[] {"*.*.*"});
         assertFalse(instrumentor.isExcludedClassLoader("X"));
         assertFalse(instrumentor.isExcludedClassLoader("a.X"));
         assertTrue(instrumentor.isExcludedClassLoader("a.b.X"));
@@ -68,7 +68,7 @@ public class ClassLoaderExclusionTest {
 
     @Test
     public void testRejectingSecondLevelAndBelow() {
-        instrumentor.addExcludedClassLoader("*.*.**");
+        instrumentor.addExcludedClassLoaders(new String[] {"*.*.**"});
         assertFalse(instrumentor.isExcludedClassLoader("X"));
         assertFalse(instrumentor.isExcludedClassLoader("a.X"));
         assertTrue(instrumentor.isExcludedClassLoader("a.b.X"));
@@ -77,7 +77,7 @@ public class ClassLoaderExclusionTest {
 
     @Test
     public void testRejectingThirdLevel() {
-        instrumentor.addExcludedClassLoader("*.*.*.*");
+        instrumentor.addExcludedClassLoaders(new String[] {"*.*.*.*"});
         assertFalse(instrumentor.isExcludedClassLoader("X"));
         assertFalse(instrumentor.isExcludedClassLoader("a.X"));
         assertFalse(instrumentor.isExcludedClassLoader("a.b.X"));
@@ -86,7 +86,7 @@ public class ClassLoaderExclusionTest {
 
     @Test
     public void testRejectingThirdLevelAndBelow() {
-        instrumentor.addExcludedClassLoader("*.*.*.**");
+        instrumentor.addExcludedClassLoaders(new String[] {"*.*.*.**"});
         assertFalse(instrumentor.isExcludedClassLoader("X"));
         assertFalse(instrumentor.isExcludedClassLoader("a.X"));
         assertFalse(instrumentor.isExcludedClassLoader("a.b.X"));
@@ -96,7 +96,7 @@ public class ClassLoaderExclusionTest {
 
     @Test
     public void testRejectingSpecificLoader() {
-        instrumentor.addExcludedClassLoader("**.LOADER");
+        instrumentor.addExcludedClassLoaders(new String[] {"**.LOADER"});
         assertTrue(instrumentor.isExcludedClassLoader("a.LOADER"));
         assertTrue(instrumentor.isExcludedClassLoader("a.b.LOADER"));
         assertTrue(instrumentor.isExcludedClassLoader("a.b.c.LOADER"));
@@ -108,7 +108,7 @@ public class ClassLoaderExclusionTest {
 
     @Test
     public void testRejectingBySingleCharcterGlobs() {
-        instrumentor.addExcludedClassLoader("**.?X");
+        instrumentor.addExcludedClassLoaders(new String[] {"**.?X"});
         assertTrue(instrumentor.isExcludedClassLoader("a.1X"));
         assertTrue(instrumentor.isExcludedClassLoader("a.b.1X"));
         assertTrue(instrumentor.isExcludedClassLoader("a.b.c.1X"));
@@ -124,7 +124,7 @@ public class ClassLoaderExclusionTest {
 
     @Test
     public void testRejectingnamesWithDollars() {
-        instrumentor.addExcludedClassLoader("**.X$Y");
+        instrumentor.addExcludedClassLoaders(new String[] {"**.X$Y"});
         assertTrue(instrumentor.isExcludedClassLoader("a.X$Y"));
         assertTrue(instrumentor.isExcludedClassLoader("a.b.X$Y"));
         assertTrue(instrumentor.isExcludedClassLoader("a.b.c.X$Y"));

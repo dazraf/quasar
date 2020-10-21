@@ -63,8 +63,23 @@ public final class QuasarInstrumentor {
     private final boolean aot;
     private boolean allowMonitors;
     private boolean allowBlocking;
-    private final Collection<Pattern> exclusions = new ArrayList<>();
-    private final Collection<Pattern> excludedClassLoaders = new ArrayList<>();
+    // Filter is either include or exclude.
+    enum FilterPolarity {
+        INCLUDED, EXCLUDED;
+        FilterPolarity invert() {
+            switch (this) {
+                case INCLUDED:
+                    return EXCLUDED;
+                case EXCLUDED:
+                    return INCLUDED;
+            }
+            // Should never happen.
+            throw new RuntimeException("Unexpected FilterPolarity");
+        }
+    }
+    private FilterPolarity filterPolarity = FilterPolarity.EXCLUDED;
+    private final Collection<Pattern> filterClasses = new ArrayList<>();
+    private final Collection<Pattern> filterClassLoaders = new ArrayList<>();
     private Log log;
     private boolean verbose;
     private boolean debug;
@@ -92,7 +107,7 @@ public final class QuasarInstrumentor {
 
     @SuppressWarnings("WeakerAccess")
     public boolean shouldInstrument(ClassLoader loader) {
-        return loader != null && !isExcludedClassLoader(loader.getClass().getName());
+        return loader != null && (!isExcludedClassLoader(loader.getClass().getName()));
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -277,11 +292,25 @@ public final class QuasarInstrumentor {
         this.debug = debug;
         setLogLevelMask();
     }
-    
-    public synchronized void addExcludedPackage(String packageGlob) {
-        exclusions.add(packagePattern(packageGlob));
+
+    public synchronized void addIncludedPackages(String[] packageGlobs) {
+        addFilterPackages(packageGlobs, FilterPolarity.INCLUDED);
     }
-    
+    public synchronized void addExcludedPackages(String[] packageGlobs) {
+        addFilterPackages(packageGlobs, FilterPolarity.EXCLUDED);
+    }
+    private synchronized void addFilterPackages(String[] packageGlobs, FilterPolarity polarity) {
+        // Make sure polarity is correct.
+        if (!filterClasses.isEmpty() && filterPolarity == polarity.invert()) {
+            log.log(LogLevel.WARNING, "Cannot add filter for %s", polarity);
+            return;
+        }
+        for (String s : packageGlobs) {
+            filterClasses.add(classLoaderPattern(s));
+        }
+        filterPolarity = polarity;
+    }
+
     public synchronized boolean isExcluded(String className) {
         if (className != null) {
             className = className.replace('.', '/');
@@ -291,24 +320,38 @@ public final class QuasarInstrumentor {
                 return false;
             final String packageName = className.substring(0, i);
             
-            for (Pattern p : exclusions) {
+            for (Pattern p : filterClasses) {
                 if (p.matcher(packageName).matches())
-                    return true;
+                    return FilterPolarity.EXCLUDED == filterPolarity;
             }
         }
-        return false;
+        return FilterPolarity.EXCLUDED != filterPolarity;
     }
 
     synchronized boolean isExcludedClassLoader(String classLoaderName) {
-        for (Pattern pattern : excludedClassLoaders) {
+        for (Pattern pattern : filterClassLoaders) {
             if (pattern.matcher(classLoaderName).matches())
-                return true;
+                return FilterPolarity.EXCLUDED == filterPolarity;
         }
-        return false;
+        return FilterPolarity.EXCLUDED != filterPolarity;
     }
 
-    public synchronized void addExcludedClassLoader(String glob) {
-        excludedClassLoaders.add(classLoaderPattern(glob));
+    public synchronized void addExcludedClassLoaders(String[] globs) {
+        addFilterClassLoaders(globs, FilterPolarity.EXCLUDED);
+    }
+    public synchronized void addIncludedClassLoaders(String[] globs) {
+        addFilterClassLoaders(globs, FilterPolarity.INCLUDED);
+    }
+    private synchronized void addFilterClassLoaders(String[] globs, FilterPolarity polarity) {
+        // Make sure polarity is correct.
+        if (!filterClassLoaders.isEmpty() && filterPolarity == polarity.invert()) {
+            log.log(LogLevel.WARNING, "Cannot add filter for %s", polarity);
+            return;
+        }
+        for (String s : globs) {
+            filterClassLoaders.add(classLoaderPattern(s));
+        }
+        filterPolarity = polarity;
     }
 
     private static Pattern classLoaderPattern(String glob) {
