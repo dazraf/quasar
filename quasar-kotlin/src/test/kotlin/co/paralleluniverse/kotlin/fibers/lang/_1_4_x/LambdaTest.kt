@@ -10,6 +10,13 @@ import kotlin.test.assertTrue
 
 class LambdaTest {
 
+    class localLambda (val lambda : (Int) -> Int = {0}) {
+        @Suspendable
+        fun foo(i:Int) : Int {
+            return lambda(i)
+        }
+    }
+
     @Suspendable
     private fun fib(a: Int): Int {
         return { num: Int ->
@@ -19,6 +26,14 @@ class LambdaTest {
                 else -> { fib(num - 2) + fib(num - 1) }
             }
         }(a)
+    }
+
+    @Test
+    fun `lambda class member`() {
+        val ll = localLambda(lambda = @Suspendable {Fiber.yield(); it + 1})
+        assertEquals(34, StaticPropertiesTest.fiberWithVerifyInstrumentationOn {
+            ll.foo(33)
+        })
     }
 
     @Test

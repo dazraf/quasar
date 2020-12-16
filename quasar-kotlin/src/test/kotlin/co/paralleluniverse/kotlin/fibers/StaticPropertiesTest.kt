@@ -29,6 +29,7 @@ object StaticPropertiesTest {
         }
     }
 
+    @JvmStatic
     fun <T> fiberWithVerifyInstrumentationOn(f: () -> T) : T {
         return withVerifyInstrumentationOn {
             Assume.assumeTrue(SystemProperties.isEmptyOrTrue(StaticPropertiesTest.verifyInstrumentationKey))
