@@ -34,7 +34,6 @@ public class LambdaTestSuspendable {
         }
     }
 
-    @Ignore
     @Test
     public void lambdaSupplier() {
         int n = 10;
