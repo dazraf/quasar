@@ -35,7 +35,7 @@ public class LambdaTestSuspendable {
     }
 
     @Test
-    public void lambdaSupplier() {
+    public void lambdaSupplier1() {
         int n = 10;
         assertThat(
         StaticPropertiesTest.fiberWithVerifyInstrumentationOn(
@@ -46,5 +46,29 @@ public class LambdaTestSuspendable {
                         }
                 )
         ), is(n+1));
+    }
+
+    @Test
+    public void lambdaSupplier2() {
+        int n = 10;
+        // This works, despite the fact the lambda is not marked Suspendable.
+        // So this implies that the lambda is instrumented because of suspendable-supers.
+        LambdaTest1 test1 = new LambdaTest1(() -> {yield(); return n;});
+        assertThat(
+                StaticPropertiesTest.fiberWithVerifyInstrumentationOn(
+                        () -> test1.addSusp(1)
+                ), is(n+1));
+    }
+
+    @Test
+    public void lambdaSupplier3() {
+        int n = 10;
+        // So now create a normal lambda that just uses the SupplierInterface.
+        // If it is being instrumented then does this break outside of a Fiber context?
+        LambdaTest1 test1 = new LambdaTest1(() -> {return n;});
+        assertThat(
+                test1.addNonSusp(1),
+                is(n+1)
+        );
     }
 }

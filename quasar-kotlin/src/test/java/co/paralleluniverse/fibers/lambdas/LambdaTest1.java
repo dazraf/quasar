@@ -12,7 +12,11 @@ public class LambdaTest1 {
     }
 
     @Suspendable
-    Integer add(Integer n) {
+    Integer addSusp(Integer n) {
+        return supplierInt.get() + n;
+    }
+
+    Integer addNonSusp(Integer n) {
         return supplierInt.get() + n;
     }
 }

@@ -4,12 +4,30 @@ import co.paralleluniverse.common.util.SystemProperties
 import co.paralleluniverse.fibers.Fiber
 import co.paralleluniverse.fibers.Fiber.sleep
 import co.paralleluniverse.fibers.Suspendable
+import co.paralleluniverse.fibers.lambdas.LambdaInterface
 import co.paralleluniverse.kotlin.fibers.StaticPropertiesTest.fiberWithVerifyInstrumentationOn
 import org.junit.Assume
 import org.junit.Ignore
 import org.junit.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+
+abstract class LambdaInterface1 : LambdaInterface {
+    override fun method1(a: Int?): Int {
+        return method1(a,a);
+    }
+    /*
+    override fun method1(a:Int?, b:Int?):Int{
+        TODO("Not yet implemented")
+    }
+    */
+}
+
+class LambdaInterface2 : LambdaInterface1() {
+    override fun method1(a: Int?, b: Int?): Int {
+        TODO("Not yet implemented")
+    }
+}
 
 class SAMTest {
 
