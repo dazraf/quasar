@@ -16,13 +16,18 @@ package co.paralleluniverse.concurrent.util;
 import co.paralleluniverse.common.reflection.GetAccessDeclaredConstructor;
 import co.paralleluniverse.common.reflection.GetAccessDeclaredField;
 import co.paralleluniverse.common.reflection.GetDeclaredField;
-import co.paralleluniverse.common.util.*;
-import sun.misc.*;
+import co.paralleluniverse.common.reflection.GetFirstDeclaredField;
+import co.paralleluniverse.common.util.UtilUnsafe;
+import sun.misc.Unsafe;
 
-import java.lang.ref.*;
-import java.lang.reflect.*;
-import java.security.*;
-import java.util.*;
+import java.lang.ref.Reference;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.security.AccessControlContext;
+import java.security.PrivilegedActionException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.security.AccessController.doPrivileged;
 
@@ -50,7 +55,7 @@ public class ThreadAccess {
 
     static {
         try {
-            targetOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(Thread.class, "target")));
+            targetOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetFirstDeclaredField(Thread.class, "target", "runnable")));
             threadLocalsOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(Thread.class, "threadLocals")));
             inheritableThreadLocalsOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(Thread.class, "inheritableThreadLocals")));
             contextClassLoaderOffset = UNSAFE.objectFieldOffset(doPrivileged(new GetDeclaredField(Thread.class, "contextClassLoader")));
